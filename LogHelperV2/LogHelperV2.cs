@@ -1,9 +1,12 @@
 ﻿using LogViewer;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LogHelperV2
@@ -49,6 +52,19 @@ namespace LogHelperV2
             {
                 MessageBox.Show(ex.Message);
             }
+
+
+
+
+
+            backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
+            backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(backgroundWorker_ProgressChanged);
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.WorkerSupportsCancellation = true;
+
+
+
         }
 
 
@@ -78,23 +94,14 @@ namespace LogHelperV2
             DirectoryInfo info = new DirectoryInfo(directory.FullName);
             FileInfo[] files = info.GetFiles().OrderByDescending(p => p.LastWriteTime).ToArray();
 
-            foreach (var file in files)
+            foreach (FileInfo file in files)
             {
                 //FileInfo file = new FileInfo(fileName);
                 if (file.Extension == ".txt" || file.Extension == ".log")
                 {
-                    long size = file.Length;
-                    string _size;
 
 
-                    if (size < 1024)
-                        _size = size + "B";
-                    else if (size / 1024 < 1024) _size = (size / 1024) + "KB";
-                    else _size = size / 1024 / 1024 + "MB";
-
-
-
-                    TreeNode fileNode = new TreeNode($"[{ file.LastWriteTime }] - {file.Name} ({ _size }) ");
+                    TreeNode fileNode = new TreeNode($"[{ file.LastWriteTime }] - {file.Name} ({ ConvertSizeToString(file.Length) }) ");
                     fileNode.Tag = file;
                     directoryNode.Nodes.Add(fileNode);
 
@@ -111,6 +118,16 @@ namespace LogHelperV2
                 }
             }
             return directoryNode;
+        }
+
+        private static string ConvertSizeToString(long size)
+        {
+            string _size;
+            if (size < 1024)
+                _size = size + "B";
+            else if (size / 1024 < 1024) _size = (size / 1024) + "KB";
+            else _size = size / 1024 / 1024 + "MB";
+            return _size;
         }
 
         private bool FilterFavs(string name, List<string> favs)
@@ -169,13 +186,85 @@ namespace LogHelperV2
             }
         }
 
+
+
+
+
+
+
+
+
+
+
+        //---/// UPDATE IN BACKGROND IS NOT WORKING 
+
+
+
+
+
+       private BackgroundWorker backgroundWorker;
+
         private void button1_Click(object sender, EventArgs e)
         {
-            treeView1.Nodes.Clear();
-            treeView1.Nodes.Add(TraverseDirectory(INITIALPATH_MILESTONE));
-            treeView1.Nodes.Add(TraverseDirectory(INITIALPATH_VIDEOOS));
 
-            treeView1.Nodes[0].Expand();
+            if (backgroundWorker.IsBusy)
+            {
+                backgroundWorker.CancelAsync();
+            }
+            else
+            {
+                backgroundWorker.RunWorkerAsync();
+            }
+        }
+
+        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            Console.WriteLine(e.ProgressPercentage);
+        }
+
+        private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (!backgroundWorker.CancellationPending)
+            {
+                nodeNumer = 0;
+
+                 foreach (TreeNode node in treeView1.Nodes)
+                {
+                    RefreshRecursive(node);
+                };
+               Thread.Sleep(5000);
+            }
+
+         
+        }
+
+        int nodeNumer = 0;
+        private void RefreshRecursive(TreeNode node)
+        {
+            backgroundWorker.ReportProgress(nodeNumer++, treeView1.Nodes.Count);
+            if (node.Tag is FileInfo)
+            {
+                FileInfo file = new FileInfo((node.Tag as FileInfo).FullName);
+
+                treeView1.Invoke((MethodInvoker)delegate
+                {
+                    //treeView1.BeginUpdate();
+                    //treeView1.SuspendLayout();
+                    node.Text = ($"[{ file.LastWriteTime }] - {file.Name} ({ ConvertSizeToString(file.Length) }) ");
+                    //treeView1.ResumeLayout(false);
+                    //treeView1.PerformLayout();
+                    //treeView1.EndUpdate();
+
+                });
+
+            }
+            else
+            {
+                foreach (TreeNode tn in node.Nodes)
+                {
+                    RefreshRecursive(tn);
+                }
+            }
 
         }
     }
