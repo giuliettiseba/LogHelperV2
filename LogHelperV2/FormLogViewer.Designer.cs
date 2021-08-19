@@ -40,7 +40,7 @@ namespace LogViewer
             this.info = new System.Windows.Forms.CheckBox();
             this.error = new System.Windows.Forms.CheckBox();
             this.debug = new System.Windows.Forms.CheckBox();
-            this.Others = new System.Windows.Forms.CheckBox();
+            this.warning = new System.Windows.Forms.CheckBox();
             this.textBox_Console = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.tableLayoutPanel1.SuspendLayout();
@@ -69,11 +69,11 @@ namespace LogViewer
             this.flowLayoutPanel1.Controls.Add(this.autoscroll_CheckBox);
             this.flowLayoutPanel1.Controls.Add(this.button3);
             this.flowLayoutPanel1.Controls.Add(this.button2);
-            this.flowLayoutPanel1.Controls.Add(this.message);
             this.flowLayoutPanel1.Controls.Add(this.info);
+            this.flowLayoutPanel1.Controls.Add(this.warning);
+            this.flowLayoutPanel1.Controls.Add(this.message);
             this.flowLayoutPanel1.Controls.Add(this.error);
             this.flowLayoutPanel1.Controls.Add(this.debug);
-            this.flowLayoutPanel1.Controls.Add(this.Others);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 404);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -122,7 +122,7 @@ namespace LogViewer
             this.message.AutoSize = true;
             this.message.Checked = true;
             this.message.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.message.Location = new System.Drawing.Point(327, 3);
+            this.message.Location = new System.Drawing.Point(449, 3);
             this.message.Name = "message";
             this.message.Size = new System.Drawing.Size(69, 17);
             this.message.TabIndex = 19;
@@ -135,7 +135,7 @@ namespace LogViewer
             this.info.AutoSize = true;
             this.info.Checked = true;
             this.info.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.info.Location = new System.Drawing.Point(402, 3);
+            this.info.Location = new System.Drawing.Point(327, 3);
             this.info.Name = "info";
             this.info.Size = new System.Drawing.Size(44, 17);
             this.info.TabIndex = 18;
@@ -148,7 +148,7 @@ namespace LogViewer
             this.error.AutoSize = true;
             this.error.Checked = true;
             this.error.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.error.Location = new System.Drawing.Point(452, 3);
+            this.error.Location = new System.Drawing.Point(524, 3);
             this.error.Name = "error";
             this.error.Size = new System.Drawing.Size(48, 17);
             this.error.TabIndex = 20;
@@ -161,7 +161,7 @@ namespace LogViewer
             this.debug.AutoSize = true;
             this.debug.Checked = true;
             this.debug.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.debug.Location = new System.Drawing.Point(506, 3);
+            this.debug.Location = new System.Drawing.Point(578, 3);
             this.debug.Name = "debug";
             this.debug.Size = new System.Drawing.Size(58, 17);
             this.debug.TabIndex = 17;
@@ -169,18 +169,18 @@ namespace LogViewer
             this.debug.UseVisualStyleBackColor = true;
             this.debug.CheckedChanged += new System.EventHandler(this.CheckedChanged);
             // 
-            // Others
+            // warning
             // 
-            this.Others.AutoSize = true;
-            this.Others.Checked = true;
-            this.Others.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.Others.Location = new System.Drawing.Point(570, 3);
-            this.Others.Name = "Others";
-            this.Others.Size = new System.Drawing.Size(57, 17);
-            this.Others.TabIndex = 21;
-            this.Others.Text = "Others";
-            this.Others.UseVisualStyleBackColor = true;
-            this.Others.CheckedChanged += new System.EventHandler(this.CheckedChanged);
+            this.warning.AutoSize = true;
+            this.warning.Checked = true;
+            this.warning.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.warning.Location = new System.Drawing.Point(377, 3);
+            this.warning.Name = "warning";
+            this.warning.Size = new System.Drawing.Size(66, 17);
+            this.warning.TabIndex = 21;
+            this.warning.Text = "Warning";
+            this.warning.UseVisualStyleBackColor = true;
+            this.warning.CheckedChanged += new System.EventHandler(this.CheckedChanged);
             // 
             // textBox_Console
             // 
@@ -229,7 +229,7 @@ namespace LogViewer
         private System.Windows.Forms.CheckBox info;
         private System.Windows.Forms.CheckBox error;
         private System.Windows.Forms.CheckBox message;
-        private System.Windows.Forms.CheckBox Others;
+        private System.Windows.Forms.CheckBox warning;
         private System.Windows.Forms.CheckBox autoscroll_CheckBox;
     }
 }

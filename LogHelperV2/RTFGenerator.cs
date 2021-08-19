@@ -14,7 +14,7 @@ namespace LogViewer
 
         string _color = @"\cf1";
 
-        internal void add(string text)
+        internal void add(string text, bool[] show)
         {
             string header = "";
 
@@ -31,11 +31,11 @@ namespace LogViewer
             
             if (header != "") 
             header = header.ToUpper();
-            if (header.Contains("INFO")) _color = @"\cf1";
-            else if (header.Contains("WARNING")) _color = @"\cf2";
-            else if (header.Contains("MESSAGE")) _color = @"\cf3";
-            else if (header.Contains("ERROR")) _color = @"\cf4";
-            else if (header.Contains("DEBUG")) _color = @"\cf5";
+            if (header.Contains("INFO")) if (show[0]) _color = @"\cf1"; else return;
+            else if (header.Contains("WARNING")) if (show[1]) _color = @"\cf2"; else return;
+            else if (header.Contains("MESSAGE")) if (show[2]) _color = @"\cf3"; else return;
+            else if (header.Contains("ERROR")) if (show[3]) _color = @"\cf4"; else return;
+            else if (header.Contains("DEBUG")) if (show[4]) _color = @"\cf5"; else return;
 
             sb.Append(_color + " " + text.Replace(@"\", @"\\") + @" \par");
         }

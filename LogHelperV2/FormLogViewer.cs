@@ -42,11 +42,11 @@ namespace LogViewer
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            ts = new CancellationTokenSource();
-            CancellationToken ct = ts.Token;
-            Task bgTask = Task.Run(() => BackgroundWorker1_DoWork(ct));
+            ExecuteBackgroundWorker();
         }
 
+
+        bool firstIteration = true;
         private void BackgroundWorker1_DoWork(CancellationToken ct)
         {
             var wh = new AutoResetEvent(false);
@@ -62,6 +62,7 @@ namespace LogViewer
 
             using (var sr = new StreamReader(fs))
             {
+                bool[] show = { info.Checked, warning.Checked, message.Checked, error.Checked, debug.Checked };
                 var text = "";
                 while (!ct.IsCancellationRequested) /// LOOP UNTIL THE FORM IS DISPOSED 
                 {
@@ -71,7 +72,7 @@ namespace LogViewer
                         try
                         {
                             if (firstIteration)
-                                rtf_generator.add(text);   // Load the file, convert the text to rtf in RTFGenerator
+                                rtf_generator.add(text, show);   // Load the file, convert the text to rtf in RTFGenerator
                             else
                                 WriteInConsole(text);      // Add the new line dictly to the box
 
@@ -87,7 +88,7 @@ namespace LogViewer
                     }
                     else // NO MORE LINES 
                     {
-                        if (firstIteration) 
+                        if (firstIteration)
                         {
                             textBox_Console.Invoke((MethodInvoker)delegate
                             {
@@ -121,8 +122,6 @@ namespace LogViewer
             return stream;
         }
 
-        bool firstIteration = true;
-
         Color _color = INFOCOLOR;
 
         private void WriteInConsole(string text)
@@ -143,24 +142,24 @@ namespace LogViewer
             }
 
             header = header.ToUpper();
-            if (header.Contains("INFO")) _color = INFOCOLOR;
-            else if (header.Contains("WARNING")) _color = WARNININGCOLOR;
-            else if (header.Contains("MESSAGE")) _color = MESSAGECOLOR;
-            else if (header.Contains("ERROR")) _color = ERRORCOLOR;
-            else if (header.Contains("DEBUG")) _color = DEBUGCOLOR;
+            if (header.Contains("INFO")) { if (info.Checked) _color = INFOCOLOR; else return; }
+            else if (header.Contains("WARNING")) { if (warning.Checked) _color = WARNININGCOLOR; else return; }
+            else if (header.Contains("MESSAGE")) { if (message.Checked) _color = MESSAGECOLOR; else return; }
+            else if (header.Contains("ERROR")) { if (error.Checked) _color = ERRORCOLOR; else return; }
+            else if (header.Contains("DEBUG")) { if (debug.Checked) _color = DEBUGCOLOR; else return; }
 
             textBox_Console.Invoke((ThreadStart)delegate
-            {
-                textBox_Console.SelectionStart = textBox_Console.TextLength;
-                textBox_Console.SelectionLength = 0;
-                textBox_Console.SelectionColor = _color;
-                textBox_Console.AppendText(text + Environment.NewLine);
-                if (autoscroll)
-                {
-                    textBox_Console.SelectionStart = textBox_Console.TextLength;
-                    textBox_Console.ScrollToCaret();
-                }
-            });
+                        {
+                            textBox_Console.SelectionStart = textBox_Console.TextLength;
+                            textBox_Console.SelectionLength = 0;
+                            textBox_Console.SelectionColor = _color;
+                            textBox_Console.AppendText(text + Environment.NewLine);
+                            if (autoscroll)
+                            {
+                                textBox_Console.SelectionStart = textBox_Console.TextLength;
+                                textBox_Console.ScrollToCaret();
+                            }
+                        });
         }
 
 
@@ -213,10 +212,26 @@ namespace LogViewer
         //Dictionary<>
         private void CheckedChanged(object sender, EventArgs e)
         {
-            //  TODO
-            //    ((CheckBox)e).Name
+
+            textBox_Console.Clear();
+
+            ts.Cancel();
+            //            bgTask.Wait();
+            //bgTask.Dispose();
+            firstIteration = true;
+            ExecuteBackgroundWorker();
         }
 
+        Task bgTask;
+        private void ExecuteBackgroundWorker()
+        {
+            ts = new CancellationTokenSource();
+
+
+            bgTask = Task.Run(() => BackgroundWorker1_DoWork(ts.Token), ts.Token);
+
+            //bgTask = Task.Run(() => BackgroundWorker1_DoWork(ct));
+        }
 
         private void button2_Click(object sender, EventArgs e)
         {

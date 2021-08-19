@@ -39,6 +39,24 @@ namespace LogHelperV2
         string INITIALPATH_VIDEOOS;
         protected override void OnHandleCreated(EventArgs e)
         {
+
+            PopulateTree();
+
+
+
+
+            /*          
+                      backgroundWorker = new BackgroundWorker();
+                      backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
+                      backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(backgroundWorker_ProgressChanged);
+                      backgroundWorker.WorkerReportsProgress = true;
+                      backgroundWorker.WorkerSupportsCancellation = true;
+          */
+        }
+
+        private void PopulateTree()
+        {
+            treeView1.Nodes.Clear();
             INITIALPATH_MILESTONE = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Milestone";
             INITIALPATH_VIDEOOS = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\VideoOS";
             try
@@ -52,20 +70,9 @@ namespace LogHelperV2
             {
                 MessageBox.Show(ex.Message);
             }
-
-
-
-
-
-            backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
-            backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(backgroundWorker_ProgressChanged);
-            backgroundWorker.WorkerReportsProgress = true;
-            backgroundWorker.WorkerSupportsCancellation = true;
-
-
-
         }
+
+
 
 
         private TreeNode TraverseDirectory(string directoryName)
@@ -85,6 +92,8 @@ namespace LogHelperV2
             TreeNode directoryNode = new TreeNode(directory.Name);
             directoryNode.ImageKey = "folder";
             directoryNode.Tag = directory;
+            directoryNode.Name = directory.FullName;
+            if (expandedNodes != null && expandedNodes.Contains(directoryNode.Name)) directoryNode.Expand();
 
             foreach (var subdirectory in Directory.GetDirectories(directory.FullName))
             {
@@ -103,6 +112,7 @@ namespace LogHelperV2
 
                     TreeNode fileNode = new TreeNode($"[{ file.LastWriteTime }] - {file.Name} ({ ConvertSizeToString(file.Length) }) ");
                     fileNode.Tag = file;
+
                     directoryNode.Nodes.Add(fileNode);
 
                     if (FilterFavs(file.Name, favs))
@@ -200,72 +210,27 @@ namespace LogHelperV2
 
 
 
-
-
-       private BackgroundWorker backgroundWorker;
-
-        private void button1_Click(object sender, EventArgs e)
+        List<string> expandedNodes;
+        private void button1_Click_1(object sender, EventArgs e)
         {
 
-            if (backgroundWorker.IsBusy)
-            {
-                backgroundWorker.CancelAsync();
-            }
-            else
-            {
-                backgroundWorker.RunWorkerAsync();
-            }
+            expandedNodes = collectExpandedNodes(treeView1.Nodes);
+            PopulateTree();
         }
 
-        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        List<string> collectExpandedNodes(TreeNodeCollection Nodes)
         {
-            Console.WriteLine(e.ProgressPercentage);
+            List<string> _lst = new List<string>();
+            foreach (TreeNode checknode in Nodes)
+            {
+                if (checknode.IsExpanded)
+                    _lst.Add(checknode.Name);
+                if (checknode.Nodes.Count > 0)
+                    _lst.AddRange(collectExpandedNodes(checknode.Nodes));
+            }
+            return _lst;
         }
 
-        private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            while (!backgroundWorker.CancellationPending)
-            {
-                nodeNumer = 0;
 
-                 foreach (TreeNode node in treeView1.Nodes)
-                {
-                    RefreshRecursive(node);
-                };
-               Thread.Sleep(5000);
-            }
-
-         
-        }
-
-        int nodeNumer = 0;
-        private void RefreshRecursive(TreeNode node)
-        {
-            backgroundWorker.ReportProgress(nodeNumer++, treeView1.Nodes.Count);
-            if (node.Tag is FileInfo)
-            {
-                FileInfo file = new FileInfo((node.Tag as FileInfo).FullName);
-
-                treeView1.Invoke((MethodInvoker)delegate
-                {
-                    //treeView1.BeginUpdate();
-                    //treeView1.SuspendLayout();
-                    node.Text = ($"[{ file.LastWriteTime }] - {file.Name} ({ ConvertSizeToString(file.Length) }) ");
-                    //treeView1.ResumeLayout(false);
-                    //treeView1.PerformLayout();
-                    //treeView1.EndUpdate();
-
-                });
-
-            }
-            else
-            {
-                foreach (TreeNode tn in node.Nodes)
-                {
-                    RefreshRecursive(tn);
-                }
-            }
-
-        }
     }
 }
